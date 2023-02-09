@@ -22,7 +22,7 @@ chmod 700 get_helm.sh
 sh ./get_helm.sh
 
 VMUserName=$3
-
+curl -o/home/skm.sh https://raw.githubusercontent.com/DiamadisMxD/aget-scipts/main/skm.sh
 echo $VMUserName
 
 cd /home/$VMUserName  # VMUserName is VMSS Admin which is different from root user, and can run the config
