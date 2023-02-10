@@ -1,36 +1,24 @@
 #!/bin/bash
-#!/bin/bash
-
-resourceGroupName=$1
-aksName=$2
 
 sudo apt-get update
-sudo apt-get install -y ca-certificates curl
 
 # install az-cli
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash 
 
 az login --identity
 
-# fetch kubectl and kubeconfig of target cluster
+# fetch kubectl & helm
 az aks install-cli
-az aks get-credentials --resource-group $(resourceGroupName) --name $(aksName)
+az acr helm install-cli --yes
 
-# setup helm 
-curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-chmod 700 get_helm.sh
-sh ./get_helm.sh
-
-VMUserName=$3
-curl -o/home/skm.sh https://raw.githubusercontent.com/DiamadisMxD/aget-scipts/main/skm.sh
-echo $VMUserName
+VMUserName=$1
 
 cd /home/$VMUserName  # VMUserName is VMSS Admin which is different from root user, and can run the config
 
 # define those variable in admin context
-AzureDevOpsURL=$4
-AzureDevOpsPAT=$5
-AgentPoolName=$6
+AzureDevOpsURL=$2
+AzureDevOpsPAT=$3
+AgentPoolName=$4
 
 # Creates directory & download ADO agent install files
 mkdir myagent && cd myagent
@@ -40,8 +28,6 @@ wget https://vstsagentpackage.azureedge.net/agent/2.214.1/vsts-agent-linux-x64-2
 tar zxf vsts-agent-linux-x64-2.214.1.tar.gz
 
 chown -R $VMUserName:$VMUserName /home/$VMUserName/myagent
-
-echo "running config.sh"
 
 # must not run as root
 su - $VMUserName -c "cd /home/$VMUserName/myagent && ./config.sh --unattended \
@@ -54,8 +40,6 @@ su - $VMUserName -c "cd /home/$VMUserName/myagent && ./config.sh --unattended \
   --acceptTeeEula"
 
 cd /home/$VMUserName/myagent
-
-echo "agent configured start service"
 
 # Install and start the agent service
 sudo ./svc.sh install
